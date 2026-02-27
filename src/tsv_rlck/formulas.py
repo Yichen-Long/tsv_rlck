@@ -104,6 +104,30 @@ def substrate_conductance_s(r_sub_ohm: float) -> float:
     return 1.0 / _safe_positive(r_sub_ohm)
 
 
+def advanced_inductance_h(base_l_h: float, frequency_hz: float) -> float:
+    f = max(frequency_hz, 0.0)
+    scale = 1.0 / (1.0 + 0.03 * math.sqrt(f / 1e9))
+    return max(base_l_h * scale, 0.0)
+
+
+def advanced_oxide_capacitance_f(base_c_f: float, frequency_hz: float) -> float:
+    f = max(frequency_hz, 0.0)
+    scale = 1.0 / (1.0 + 0.01 * math.log10(1.0 + f / 1e6))
+    return max(base_c_f * scale, 0.0)
+
+
+def advanced_depletion_capacitance_f(base_c_f: float, frequency_hz: float) -> float:
+    f = max(frequency_hz, 0.0)
+    scale = 1.0 / (1.0 + 0.03 * math.log10(1.0 + f / 1e6))
+    return max(base_c_f * scale, 0.0)
+
+
+def advanced_substrate_conductance_s(base_g_s: float, frequency_hz: float) -> float:
+    f = max(frequency_hz, 0.0)
+    scale = 1.0 + 0.05 * math.sqrt(f / 1e9)
+    return max(base_g_s * scale, 0.0)
+
+
 def mutual_inductance_h(distance_um: float, height_um: float) -> float:
     dist = _um_to_m(distance_um)
     h = _um_to_m(height_um)

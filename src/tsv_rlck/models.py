@@ -24,6 +24,7 @@ class OperatingPoint:
     frequency_hz: float
     temperature_c: float = 25.0
     bias_v: float = 0.0
+    model_level: Literal["simple", "advanced"] = "simple"
 
 
 @dataclass(slots=True)

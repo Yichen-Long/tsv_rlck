@@ -12,9 +12,10 @@ Analytical TSV RLCK extraction toolkit for fast research iteration.
 
 - Single-point TSV RLCK extraction
 - TSV array extraction with coupling matrices
-- Frequency sweep (`lin` / `log`) output
+- Frequency sweep (`lin` / `log`) output with `model_level` (`simple` / `advanced`)
 - Monte Carlo perturbation analysis with summary statistics
-- Benchmark comparison report (absolute / relative error)
+- Benchmark comparison report (single-case and batch)
+- S-parameter (`.s2p`) export for two-port frequency-domain analysis
 - SPICE subcircuit export (single operating point)
 - Reproducible notebook demo
 
@@ -23,6 +24,7 @@ Analytical TSV RLCK extraction toolkit for fast research iteration.
 - `src/tsv_rlck/` - core models, formulas, extractor, CLI, SPICE export
 - `tests/` - unit tests
 - `benchmarks/example_reference.json` - benchmark input/reference example
+- `benchmarks/batch_reference.json` - batch benchmark cases example
 - `notebooks/tsv_iteration2_demo.ipynb` - iteration-2 demo notebook
 
 ### Requirements
@@ -79,7 +81,7 @@ python -m tsv_rlck \
   --sigma-temperature-c 2.0
 ```
 
-#### 4) Benchmark report
+#### 4) Benchmark report (single-case)
 
 ```bash
 python -m tsv_rlck \
@@ -90,7 +92,36 @@ python -m tsv_rlck \
   --benchmark-file benchmarks/example_reference.json
 ```
 
-#### 5) Export JSON/SPICE
+#### 5) Benchmark batch report
+
+```bash
+python -m tsv_rlck \
+  --diameter-um 10 \
+  --height-um 60 \
+  --oxide-thickness-nm 200 \
+  --frequency-hz 1e9 \
+  --benchmark-batch-file benchmarks/batch_reference.json \
+  --benchmark-report-out benchmark_report.json
+```
+
+#### 6) S-parameter export (`.s2p`)
+
+```bash
+python -m tsv_rlck \
+  --diameter-um 10 \
+  --height-um 60 \
+  --oxide-thickness-nm 200 \
+  --frequency-hz 1e9 \
+  --model-level advanced \
+  --sweep-start-hz 1e6 \
+  --sweep-stop-hz 1e10 \
+  --sweep-points 21 \
+  --sweep-spacing log \
+  --sparams-out out.s2p \
+  --z0 50
+```
+
+#### 7) Export JSON/SPICE
 
 ```bash
 python -m tsv_rlck \
@@ -110,7 +141,8 @@ python -m unittest discover -s tests -v
 
 ### Notes
 
-- Current wideband behavior focuses on frequency-dependent `R`; `L/C` are currently treated as static per operating condition.
+- In `simple` mode, wideband behavior mainly captures frequency-dependent `R`; `L/C/G` are approximately static.
+- In `advanced` mode, `L/C/G` use lightweight frequency-dependent approximations.
 - SPICE export is currently single operating point.
 
 ---
@@ -123,9 +155,10 @@ python -m unittest discover -s tests -v
 
 - 单工作点 TSV RLCK 提取
 - TSV 阵列提取与耦合矩阵
-- 频率扫描输出（`lin` / `log`）
+- 频率扫描输出（`lin` / `log`），支持 `model_level`（`simple` / `advanced`）
 - Monte Carlo 工艺/温度扰动分析与统计汇总
-- 基准对比误差报告（绝对误差 / 相对误差）
+- 基准对比误差报告（单case与批量case）
+- S参数（`.s2p`）导出，用于频域对比
 - SPICE 子电路导出（单工作点）
 - 可复现实验 Notebook 示例
 
@@ -134,6 +167,7 @@ python -m unittest discover -s tests -v
 - `src/tsv_rlck/`：核心模型、公式、提取、CLI、SPICE 导出
 - `tests/`：单元测试
 - `benchmarks/example_reference.json`：基准输入与参考值示例
+- `benchmarks/batch_reference.json`：批量基准案例示例
 - `notebooks/tsv_iteration2_demo.ipynb`：第二轮迭代演示 Notebook
 
 ### 环境要求
@@ -190,7 +224,7 @@ python -m tsv_rlck \
   --sigma-temperature-c 2.0
 ```
 
-#### 4）基准误差报告
+#### 4）基准误差报告（单case）
 
 ```bash
 python -m tsv_rlck \
@@ -201,7 +235,36 @@ python -m tsv_rlck \
   --benchmark-file benchmarks/example_reference.json
 ```
 
-#### 5）导出 JSON/SPICE
+#### 5）批量基准误差报告
+
+```bash
+python -m tsv_rlck \
+  --diameter-um 10 \
+  --height-um 60 \
+  --oxide-thickness-nm 200 \
+  --frequency-hz 1e9 \
+  --benchmark-batch-file benchmarks/batch_reference.json \
+  --benchmark-report-out benchmark_report.json
+```
+
+#### 6）S 参数导出（`.s2p`）
+
+```bash
+python -m tsv_rlck \
+  --diameter-um 10 \
+  --height-um 60 \
+  --oxide-thickness-nm 200 \
+  --frequency-hz 1e9 \
+  --model-level advanced \
+  --sweep-start-hz 1e6 \
+  --sweep-stop-hz 1e10 \
+  --sweep-points 21 \
+  --sweep-spacing log \
+  --sparams-out out.s2p \
+  --z0 50
+```
+
+#### 7）导出 JSON/SPICE
 
 ```bash
 python -m tsv_rlck \
@@ -221,5 +284,6 @@ python -m unittest discover -s tests -v
 
 ### 说明
 
-- 当前宽带行为优先覆盖 `R` 的频率依赖；`L/C` 暂按工作条件静态处理。
+- `simple` 模式下，宽带行为优先覆盖 `R` 的频率依赖；`L/C/G` 近似静态。
+- `advanced` 模式下，`L/C/G` 提供随频率变化的近似模型。
 - SPICE 导出目前为单工作点模型。

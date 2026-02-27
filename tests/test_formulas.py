@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tsv_rlck.extractor import build_frequency_sweep
+from tsv_rlck.extractor import build_frequency_sweep, extract_single_tsv
 from tsv_rlck.formulas import (
     coupling_capacitance_f,
     mutual_inductance_h,
@@ -13,7 +13,7 @@ from tsv_rlck.formulas import (
     tsv_inductance_h,
     tsv_resistance_ohm,
 )
-from tsv_rlck.models import SweepConfig
+from tsv_rlck.models import OperatingPoint, SweepConfig, TSVGeometry, TSVProcess
 
 
 class FormulaTests(unittest.TestCase):
@@ -47,6 +47,20 @@ class FormulaTests(unittest.TestCase):
         freqs = build_frequency_sweep(sweep)
         ratios = [freqs[i + 1] / freqs[i] for i in range(len(freqs) - 1)]
         self.assertTrue(all(math.isclose(ratios[0], r, rel_tol=1e-12) for r in ratios[1:]))
+
+    def test_advanced_model_has_frequency_variation(self) -> None:
+        g = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0)
+        p = TSVProcess()
+        op_low = OperatingPoint(frequency_hz=1e6, model_level="advanced")
+        op_high = OperatingPoint(frequency_hz=1e10, model_level="advanced")
+
+        low = extract_single_tsv(g, p, op_low)
+        high = extract_single_tsv(g, p, op_high)
+
+        self.assertNotEqual(low.l_tsv_h, high.l_tsv_h)
+        self.assertNotEqual(low.c_ox_f, high.c_ox_f)
+        self.assertNotEqual(low.c_dep_f, high.c_dep_f)
+        self.assertNotEqual(low.g_sub_s, high.g_sub_s)
 
 
 if __name__ == "__main__":

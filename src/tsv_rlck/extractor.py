@@ -4,6 +4,10 @@ import math
 import random
 import statistics
 from .formulas import (
+    advanced_depletion_capacitance_f,
+    advanced_inductance_h,
+    advanced_oxide_capacitance_f,
+    advanced_substrate_conductance_s,
     coupling_capacitance_f,
     depletion_capacitance_f,
     mutual_inductance_h,
@@ -52,6 +56,13 @@ def extract_single_tsv(geometry: TSVGeometry, process: TSVProcess, op: Operating
         substrate_resistivity_ohm_cm=process.substrate_resistivity_ohm_cm,
     )
     g_sub = substrate_conductance_s(r_sub)
+
+    if op.model_level == "advanced":
+        l_tsv = advanced_inductance_h(l_tsv, op.frequency_hz)
+        c_ox = advanced_oxide_capacitance_f(c_ox, op.frequency_hz)
+        c_dep = advanced_depletion_capacitance_f(c_dep, op.frequency_hz)
+        g_sub = advanced_substrate_conductance_s(g_sub, op.frequency_hz)
+
     return SingleTSVResult(r_tsv_ohm=r_tsv, l_tsv_h=l_tsv, c_ox_f=c_ox, c_dep_f=c_dep, r_sub_ohm=r_sub, g_sub_s=g_sub)
 
 
@@ -80,9 +91,10 @@ def extract_sweep_tsv(
     process: TSVProcess,
     op: OperatingPoint,
     sweep: SweepConfig,
-) -> dict[str, list[float]]:
+) -> dict[str, list[float] | str]:
     freqs = build_frequency_sweep(sweep)
-    out = {
+    out: dict[str, list[float] | str] = {
+        "model_level": op.model_level,
         "frequency_hz": freqs,
         "r_tsv_ohm": [],
         "l_tsv_h": [],
@@ -93,7 +105,12 @@ def extract_sweep_tsv(
     }
 
     for f in freqs:
-        pt = OperatingPoint(frequency_hz=f, temperature_c=op.temperature_c, bias_v=op.bias_v)
+        pt = OperatingPoint(
+            frequency_hz=f,
+            temperature_c=op.temperature_c,
+            bias_v=op.bias_v,
+            model_level=op.model_level,
+        )
         single = extract_single_tsv(geometry, process, pt)
         out["r_tsv_ohm"].append(single.r_tsv_ohm)
         out["l_tsv_h"].append(single.l_tsv_h)
@@ -219,6 +236,7 @@ def run_monte_carlo_tsv(
             frequency_hz=op.frequency_hz,
             temperature_c=op.temperature_c + rng.gauss(0.0, mc.sigma_temperature_c),
             bias_v=op.bias_v,
+            model_level=op.model_level,
         )
         out = extract_single_tsv(perturbed_geometry, perturbed_process, perturbed_op)
         metrics["r_tsv_ohm"].append(out.r_tsv_ohm)
@@ -229,5 +247,6 @@ def run_monte_carlo_tsv(
     return {
         "samples": mc.mc_samples,
         "seed": mc.seed,
+        "model_level": op.model_level,
         "statistics": {name: _series_stats(values) for name, values in metrics.items()},
     }

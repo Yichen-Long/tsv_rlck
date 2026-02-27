@@ -60,6 +60,29 @@ class CliTests(unittest.TestCase):
             self.assertAlmostEqual(data["sweep"]["frequency_hz"][0], 1e6)
             self.assertAlmostEqual(data["sweep"]["frequency_hz"][-1], 1e9)
 
+    def test_cli_advanced_model_level(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out_json = Path(td) / "adv.json"
+            rc = main(
+                [
+                    "--diameter-um", "10",
+                    "--height-um", "60",
+                    "--oxide-thickness-nm", "200",
+                    "--frequency-hz", "1e9",
+                    "--model-level", "advanced",
+                    "--sweep-start-hz", "1e6",
+                    "--sweep-stop-hz", "1e10",
+                    "--sweep-points", "5",
+                    "--json-out", str(out_json),
+                ]
+            )
+            self.assertEqual(rc, 0)
+            data = json.loads(out_json.read_text(encoding="utf-8"))
+            self.assertEqual(data["model_level"], "advanced")
+            self.assertEqual(data["sweep"]["model_level"], "advanced")
+            l_vals = data["sweep"]["l_tsv_h"]
+            self.assertNotEqual(l_vals[0], l_vals[-1])
+
     def test_cli_monte_carlo_output(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             out_json = Path(td) / "mc.json"
@@ -131,6 +154,29 @@ class CliTests(unittest.TestCase):
             data = json.loads(out_json.read_text(encoding="utf-8"))
             self.assertIn("benchmark_report", data)
             self.assertIn("summary", data["benchmark_report"])
+            self.assertIn("rmse", data["benchmark_report"]["summary"])
+
+    def test_cli_benchmark_batch_output(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out_json = Path(td) / "batch.json"
+            report_out = Path(td) / "batch_report.json"
+            batch_file = Path(__file__).resolve().parents[1] / "benchmarks" / "batch_reference.json"
+            rc = main(
+                [
+                    "--diameter-um", "10",
+                    "--height-um", "60",
+                    "--oxide-thickness-nm", "200",
+                    "--frequency-hz", "1e9",
+                    "--json-out", str(out_json),
+                    "--benchmark-batch-file", str(batch_file),
+                    "--benchmark-report-out", str(report_out),
+                ]
+            )
+            self.assertEqual(rc, 0)
+            data = json.loads(out_json.read_text(encoding="utf-8"))
+            self.assertIn("benchmark_batch_report", data)
+            self.assertEqual(data["benchmark_batch_report"]["overall"]["cases"], 2)
+            self.assertTrue(report_out.exists())
 
 
 if __name__ == "__main__":
