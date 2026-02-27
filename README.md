@@ -1,4 +1,4 @@
-# TSV-RLCK / TSV-RLCK（中英双语）
+# TSV-RLCK
 
 [English](#english) | [中文](#中文)
 
