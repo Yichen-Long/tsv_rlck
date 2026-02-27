@@ -1,0 +1,28 @@
+{
+  "input": {
+    "geometry": {
+      "diameter_um": 10.0,
+      "height_um": 60.0,
+      "oxide_thickness_nm": 200.0,
+      "pitch_um": 40.0
+    },
+    "process": {
+      "metal_resistivity_ohm_m": 1.68e-8,
+      "substrate_resistivity_ohm_cm": 10.0,
+      "substrate_doping_cm3": 1.0e15,
+      "eps_ox_rel": 3.9,
+      "eps_si_rel": 11.7
+    },
+    "operating_point": {
+      "frequency_hz": 1e9,
+      "temperature_c": 25.0,
+      "bias_v": 0.0
+    }
+  },
+  "reference": {
+    "r_tsv_ohm": 0.1,
+    "l_tsv_h": 1e-11,
+    "c_ox_f": 1e-14,
+    "c_dep_f": 1e-14
+  }
+}
