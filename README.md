@@ -11,7 +11,7 @@ Analytical TSV RLCK extraction toolkit for fast research iteration.
 ### Features
 
 - Single-point TSV RLCK extraction
-- TSV array extraction with coupling matrices
+- TSV array extraction with coupling matrices and topology presets (`grid` / `gsg` / `diff_pair`)
 - Frequency sweep (`lin` / `log`) output with `model_level` (`simple` / `advanced`)
 - Monte Carlo perturbation analysis with summary statistics
 - Benchmark comparison report (single-case and batch)
@@ -133,7 +133,20 @@ python -m tsv_rlck \
   --spice-out out.sp
 ```
 
-### Tests
+#### 8) Array topology preset example
+
+```bash
+python -m tsv_rlck \
+  --diameter-um 10 \
+  --height-um 60 \
+  --oxide-thickness-nm 200 \
+  --frequency-hz 1e9 \
+  --rows 1 \
+  --cols 3 \
+  --topology gsg \
+  --json-out array_gsg.json
+```
+
 
 ```bash
 python -m unittest discover -s tests -v
@@ -154,7 +167,7 @@ python -m unittest discover -s tests -v
 ### 功能
 
 - 单工作点 TSV RLCK 提取
-- TSV 阵列提取与耦合矩阵
+- TSV 阵列提取与耦合矩阵，支持拓扑预设（`grid` / `gsg` / `diff_pair`）
 - 频率扫描输出（`lin` / `log`），支持 `model_level`（`simple` / `advanced`）
 - Monte Carlo 工艺/温度扰动分析与统计汇总
 - 基准对比误差报告（单case与批量case）

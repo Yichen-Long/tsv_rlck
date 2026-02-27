@@ -29,6 +29,7 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--eps-si-rel", type=float, default=11.7)
     p.add_argument("--rows", type=int, default=1)
     p.add_argument("--cols", type=int, default=1)
+    p.add_argument("--topology", choices=("grid", "gsg", "diff_pair"), default="grid")
 
     p.add_argument("--sweep-start-hz", type=float, default=None)
     p.add_argument("--sweep-stop-hz", type=float, default=None)
@@ -123,10 +124,21 @@ def main(argv: list[str] | None = None) -> int:
             "model_level": op.model_level,
         }
     else:
-        arr = extract_tsv_array(geometry, process, op, rows=args.rows, cols=args.cols, pitch_um=args.pitch_um)
+        arr = extract_tsv_array(
+            geometry,
+            process,
+            op,
+            rows=args.rows,
+            cols=args.cols,
+            pitch_um=args.pitch_um,
+            topology=args.topology,
+        )
         payload = {
             "single": asdict(arr.single),
             "array": {
+                "topology": args.topology,
+                "node_order": arr.node_order,
+                "node_roles": arr.node_roles,
                 "mutual_l_h": arr.mutual_l_h,
                 "coupling_c_f": arr.coupling_c_f,
             },

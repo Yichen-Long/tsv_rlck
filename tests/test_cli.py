@@ -83,7 +83,27 @@ class CliTests(unittest.TestCase):
             l_vals = data["sweep"]["l_tsv_h"]
             self.assertNotEqual(l_vals[0], l_vals[-1])
 
-    def test_cli_monte_carlo_output(self) -> None:
+    def test_cli_topology_gsg_output(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out_json = Path(td) / "gsg.json"
+            rc = main(
+                [
+                    "--diameter-um", "10",
+                    "--height-um", "60",
+                    "--oxide-thickness-nm", "200",
+                    "--frequency-hz", "1e9",
+                    "--rows", "1",
+                    "--cols", "3",
+                    "--pitch-um", "40",
+                    "--topology", "gsg",
+                    "--json-out", str(out_json),
+                ]
+            )
+            self.assertEqual(rc, 0)
+            data = json.loads(out_json.read_text(encoding="utf-8"))
+            self.assertEqual(data["array"]["topology"], "gsg")
+            self.assertEqual(data["array"]["node_roles"], ["G", "S", "G"])
+
         with tempfile.TemporaryDirectory() as td:
             out_json = Path(td) / "mc.json"
             rc = main(

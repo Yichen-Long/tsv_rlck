@@ -130,6 +130,38 @@ def _grid_positions(rows: int, cols: int, pitch_um: float) -> list[tuple[float, 
     return pts
 
 
+def _topology_layout(
+    rows: int,
+    cols: int,
+    pitch_um: float,
+    topology: str,
+) -> tuple[list[tuple[float, float]], list[str], list[str]]:
+    pts = _grid_positions(rows, cols, pitch_um)
+    n = len(pts)
+    node_order = [f"N{i}" for i in range(n)]
+
+    if topology == "grid":
+        node_roles = ["S" for _ in range(n)]
+        return pts, node_order, node_roles
+
+    if rows != 1:
+        raise ValueError(f"topology '{topology}' currently supports only rows=1")
+
+    if topology == "gsg":
+        if cols != 3:
+            raise ValueError("gsg topology requires cols=3")
+        node_roles = ["G", "S", "G"]
+        return pts, node_order, node_roles
+
+    if topology == "diff_pair":
+        if cols != 2:
+            raise ValueError("diff_pair topology requires cols=2")
+        node_roles = ["P", "N"]
+        return pts, node_order, node_roles
+
+    raise ValueError(f"unsupported topology: {topology}")
+
+
 def extract_tsv_array(
     geometry: TSVGeometry,
     process: TSVProcess,
@@ -137,6 +169,7 @@ def extract_tsv_array(
     rows: int,
     cols: int,
     pitch_um: float | None = None,
+    topology: str = "grid",
 ) -> ArrayResult:
     if rows <= 0 or cols <= 0:
         raise ValueError("rows and cols must be positive")
@@ -145,7 +178,7 @@ def extract_tsv_array(
         raise ValueError("pitch_um must be provided and positive")
 
     base = extract_single_tsv(geometry, process, op)
-    pts = _grid_positions(rows, cols, p)
+    pts, node_order, node_roles = _topology_layout(rows, cols, p, topology)
     n = len(pts)
 
     mtx_l = [[0.0 for _ in range(n)] for _ in range(n)]
@@ -161,7 +194,13 @@ def extract_tsv_array(
             mtx_l[i][j] = mtx_l[j][i] = mij
             mtx_c[i][j] = mtx_c[j][i] = cij
 
-    return ArrayResult(single=base, mutual_l_h=mtx_l, coupling_c_f=mtx_c)
+    return ArrayResult(
+        single=base,
+        mutual_l_h=mtx_l,
+        coupling_c_f=mtx_c,
+        node_order=node_order,
+        node_roles=node_roles,
+    )
 
 
 def _safe_gauss(rng: random.Random, nominal: float, sigma: float, floor: float = 1e-30) -> float:

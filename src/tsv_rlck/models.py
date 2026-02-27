@@ -61,3 +61,5 @@ class ArrayResult:
     single: SingleTSVResult
     mutual_l_h: List[List[float]] = field(default_factory=list)
     coupling_c_f: List[List[float]] = field(default_factory=list)
+    node_order: List[str] = field(default_factory=list)
+    node_roles: List[str] = field(default_factory=list)
