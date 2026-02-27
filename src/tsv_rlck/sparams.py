@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import cmath
-from .extractor import build_frequency_sweep, extract_single_tsv
+from .extractor import build_frequency_sweep, extract_single_tsv, extract_tsv_array
 from .models import OperatingPoint, SingleTSVResult, SweepConfig, TSVGeometry, TSVProcess
 
 
@@ -59,9 +59,28 @@ def extract_sparams(
     op: OperatingPoint,
     sweep: SweepConfig | None = None,
     z0: float = 50.0,
+    rows: int = 1,
+    cols: int = 1,
+    pitch_um: float | None = None,
+    topology: str = "grid",
 ) -> dict[str, object]:
     freqs = build_frequency_sweep(sweep) if sweep is not None else [op.frequency_hz]
     points: list[dict[str, float]] = []
+
+    node_order: list[str] = ["N0"]
+    node_roles: list[str] = ["S"]
+    if rows * cols > 1:
+        arr = extract_tsv_array(
+            geometry,
+            process,
+            op,
+            rows=rows,
+            cols=cols,
+            pitch_um=pitch_um,
+            topology=topology,
+        )
+        node_order = arr.node_order
+        node_roles = arr.node_roles
 
     for f in freqs:
         pt = OperatingPoint(
@@ -90,6 +109,9 @@ def extract_sparams(
     return {
         "z0_ohm": z0,
         "model_level": op.model_level,
+        "topology": topology,
+        "node_order": node_order,
+        "node_roles": node_roles,
         "points": points,
     }
 

@@ -197,7 +197,27 @@ class CliTests(unittest.TestCase):
             self.assertIn("benchmark_batch_report", data)
             self.assertEqual(data["benchmark_batch_report"]["overall"]["cases"], 2)
             self.assertTrue(report_out.exists())
+    def test_cli_sparams_with_topology_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out_s2p = Path(td) / "arr.s2p"
+            out_json = Path(td) / "arr.json"
+            rc = main(
+                [
+                    "--diameter-um", "10",
+                    "--height-um", "60",
+                    "--oxide-thickness-nm", "200",
+                    "--frequency-hz", "1e9",
+                    "--rows", "1",
+                    "--cols", "3",
+                    "--pitch-um", "40",
+                    "--topology", "gsg",
+                    "--sparams-out", str(out_s2p),
+                    "--json-out", str(out_json),
+                ]
+            )
+            self.assertEqual(rc, 0)
+            data = json.loads(out_json.read_text(encoding="utf-8"))
+            self.assertIn("sparams", data)
+            self.assertEqual(data["sparams"]["topology"], "gsg")
+            self.assertEqual(data["sparams"]["node_roles"], ["G", "S", "G"])
 
-
-if __name__ == "__main__":
-    unittest.main()

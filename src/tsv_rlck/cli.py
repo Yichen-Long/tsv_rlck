@@ -187,6 +187,28 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("benchmark batch file must contain a cases array")
         payload["benchmark_batch_report"] = compare_batch_against_reference(cases, default_model_level=op.model_level)
 
+    if args.sparams_out is not None:
+        sweep_cfg = None
+        if args.sweep_start_hz is not None and args.sweep_stop_hz is not None and args.sweep_points is not None:
+            sweep_cfg = SweepConfig(
+                f_start_hz=args.sweep_start_hz,
+                f_stop_hz=args.sweep_stop_hz,
+                points=args.sweep_points,
+                spacing=args.sweep_spacing,
+            )
+        sparams = extract_sparams(
+            geometry,
+            process,
+            op,
+            sweep=sweep_cfg,
+            z0=args.z0,
+            rows=args.rows,
+            cols=args.cols,
+            pitch_um=args.pitch_um,
+            topology=args.topology,
+        )
+        payload["sparams"] = sparams
+
     print(json.dumps(payload, indent=2))
 
     if args.json_out is not None:
@@ -208,16 +230,6 @@ def main(argv: list[str] | None = None) -> int:
         args.spice_out.write_text(spice_text, encoding="utf-8")
 
     if args.sparams_out is not None:
-        sweep_cfg = None
-        if args.sweep_start_hz is not None and args.sweep_stop_hz is not None and args.sweep_points is not None:
-            sweep_cfg = SweepConfig(
-                f_start_hz=args.sweep_start_hz,
-                f_stop_hz=args.sweep_stop_hz,
-                points=args.sweep_points,
-                spacing=args.sweep_spacing,
-            )
-        sparams = extract_sparams(geometry, process, op, sweep=sweep_cfg, z0=args.z0)
-        payload["sparams"] = sparams
-        args.sparams_out.write_text(to_touchstone_s2p(sparams), encoding="utf-8")
+        args.sparams_out.write_text(to_touchstone_s2p(payload["sparams"]), encoding="utf-8")
 
     return 0

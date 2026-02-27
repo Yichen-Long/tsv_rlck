@@ -50,3 +50,13 @@ class ArrayTests(unittest.TestCase):
         self.assertEqual(len(out.mutual_l_h), 2)
         self.assertEqual(len(out.coupling_c_f), 2)
 
+    def test_topology_shape_validation(self) -> None:
+        g = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0, pitch_um=40.0)
+        p = TSVProcess()
+        op = OperatingPoint(frequency_hz=1e9)
+
+        with self.assertRaises(ValueError):
+            extract_tsv_array(g, p, op, rows=1, cols=2, topology="gsg")
+        with self.assertRaises(ValueError):
+            extract_tsv_array(g, p, op, rows=2, cols=2, topology="diff_pair")
+

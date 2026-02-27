@@ -47,7 +47,13 @@ class SParamTests(unittest.TestCase):
             self.assertTrue(math.isfinite(abs(s22)))
             self.assertLess(abs(s11), 2.0)
             self.assertLess(abs(s21), 2.0)
+    def test_sparams_include_topology_metadata(self) -> None:
+        g = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0, pitch_um=40.0)
+        p = TSVProcess()
+        op = OperatingPoint(frequency_hz=1e9)
 
+        data = extract_sparams(g, p, op, rows=1, cols=3, pitch_um=40.0, topology="gsg")
+        self.assertEqual(data["topology"], "gsg")
+        self.assertEqual(data["node_roles"], ["G", "S", "G"])
+        self.assertEqual(data["node_order"], ["N0", "N1", "N2"])
 
-if __name__ == "__main__":
-    unittest.main()

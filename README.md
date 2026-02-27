@@ -15,7 +15,7 @@ Analytical TSV RLCK extraction toolkit for fast research iteration.
 - Frequency sweep (`lin` / `log`) output with `model_level` (`simple` / `advanced`)
 - Monte Carlo perturbation analysis with summary statistics
 - Benchmark comparison report (single-case and batch)
-- S-parameter (`.s2p`) export for two-port frequency-domain analysis
+- S-parameter (`.s2p`) export for two-port frequency-domain analysis, with topology metadata
 - SPICE subcircuit export (single operating point)
 - Reproducible notebook demo
 
@@ -171,7 +171,7 @@ python -m unittest discover -s tests -v
 - 频率扫描输出（`lin` / `log`），支持 `model_level`（`simple` / `advanced`）
 - Monte Carlo 工艺/温度扰动分析与统计汇总
 - 基准对比误差报告（单case与批量case）
-- S参数（`.s2p`）导出，用于频域对比
+- S参数（`.s2p`）导出，用于频域对比，并包含拓扑元数据
 - SPICE 子电路导出（单工作点）
 - 可复现实验 Notebook 示例
 
