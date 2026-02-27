@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import cmath
 from .extractor import build_frequency_sweep, extract_single_tsv, extract_tsv_array
-from .models import OperatingPoint, SingleTSVResult, SweepConfig, TSVGeometry, TSVProcess
+from .models import ArrayResult, OperatingPoint, SingleTSVResult, SweepConfig, TSVGeometry, TSVProcess
 
 
 def _abcd_series(z: complex) -> tuple[complex, complex, complex, complex]:
