@@ -56,4 +56,32 @@ class SParamTests(unittest.TestCase):
         self.assertEqual(data["topology"], "gsg")
         self.assertEqual(data["node_roles"], ["G", "S", "G"])
         self.assertEqual(data["node_order"], ["N0", "N1", "N2"])
+        self.assertTrue(data["array_model_used"])
+        self.assertEqual(data["port_definition"]["signal_node"], "N1")
+        self.assertEqual(data["port_definition"]["reference_nodes"], ["N0", "N2"])
+
+    def test_array_model_changes_sparams_vs_single(self) -> None:
+        g_single = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0)
+        g_array = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0, pitch_um=40.0)
+        p = TSVProcess()
+        op = OperatingPoint(frequency_hz=1e9, model_level="advanced")
+
+        single = extract_sparams(g_single, p, op, z0=50.0)
+        array = extract_sparams(g_array, p, op, rows=1, cols=3, pitch_um=40.0, topology="gsg", z0=50.0)
+
+        s21_single = complex(single["points"][0]["s21_re"], single["points"][0]["s21_im"])
+        s21_array = complex(array["points"][0]["s21_re"], array["points"][0]["s21_im"])
+        self.assertNotEqual(s21_single, s21_array)
+        self.assertTrue(abs(s21_array) < abs(s21_single))
+
+    def test_diff_pair_port_definition(self) -> None:
+        g = TSVGeometry(diameter_um=10.0, height_um=60.0, oxide_thickness_nm=200.0, pitch_um=40.0)
+        p = TSVProcess()
+        op = OperatingPoint(frequency_hz=1e9)
+
+        data = extract_sparams(g, p, op, rows=1, cols=2, pitch_um=40.0, topology="diff_pair")
+        self.assertTrue(data["array_model_used"])
+        self.assertEqual(data["port_definition"]["strategy"], "diff_pair_p_to_n")
+        self.assertEqual(data["port_definition"]["signal_node"], "N0")
+        self.assertEqual(data["port_definition"]["reference_nodes"], ["N1"])
 

@@ -220,4 +220,7 @@ class CliTests(unittest.TestCase):
             self.assertIn("sparams", data)
             self.assertEqual(data["sparams"]["topology"], "gsg")
             self.assertEqual(data["sparams"]["node_roles"], ["G", "S", "G"])
+            self.assertTrue(data["sparams"]["array_model_used"])
+            self.assertEqual(data["sparams"]["port_definition"]["signal_node"], "N1")
+            self.assertEqual(data["sparams"]["port_definition"]["reference_nodes"], ["N0", "N2"])
 
